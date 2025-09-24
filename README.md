@@ -1,1 +1,1 @@
-# COMP2139G-BC_Ticketing
+# COMP2139GBC_Ticketing
