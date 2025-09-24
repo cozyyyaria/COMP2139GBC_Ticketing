@@ -1,0 +1,399 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 #!/usr/bin/env bash\
+set -euo pipefail\
+\
+PROJECT="GBC_Ticketing"\
+\
+echo ">>> Creating project structure..."\
+rm -rf $PROJECT\
+mkdir -p $PROJECT\
+\
+# ---------- csproj ----------\
+cat > $PROJECT/GBC_Ticketing.Web.csproj <<'EOF'\
+<Project Sdk="Microsoft.NET.Sdk.Web">\
+  <PropertyGroup>\
+    <TargetFramework>net8.0</TargetFramework>\
+    <Nullable>enable</Nullable>\
+    <ImplicitUsings>enable</ImplicitUsings>\
+  </PropertyGroup>\
+  <ItemGroup>\
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />\
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />\
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />\
+    <PackageReference Include="MailKit" Version="4.5.0" />\
+    <PackageReference Include="ClosedXML" Version="0.102.5" />\
+  </ItemGroup>\
+</Project>\
+EOF\
+\
+# ---------- Program.cs ----------\
+cat > $PROJECT/Program.cs <<'EOF'\
+using Microsoft.AspNetCore.Identity;\
+using Microsoft.EntityFrameworkCore;\
+\
+var builder = WebApplication.CreateBuilder(args);\
+builder.Services.AddControllersWithViews();\
+builder.Services.AddDbContext<ApplicationDbContext>(options =>\
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));\
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()\
+    .AddEntityFrameworkStores<ApplicationDbContext>()\
+    .AddDefaultTokenProviders();\
+builder.Services.AddScoped<IEmailService, EmailService>();\
+\
+var app = builder.Build();\
+using (var scope = app.Services.CreateScope())\
+\{\
+    var services = scope.ServiceProvider;\
+    var db = services.GetRequiredService<ApplicationDbContext>();\
+    db.Database.Migrate();\
+    await DataSeed.SeedAsync(services);\
+\}\
+app.UseHttpsRedirection();\
+app.UseStaticFiles();\
+app.UseRouting();\
+app.UseAuthentication();\
+app.UseAuthorization();\
+app.MapControllerRoute(name: "default", pattern: "\{controller=Home\}/\{action=Index\}/\{id?\}");\
+app.Run();\
+EOF\
+\
+# ---------- appsettings.json ----------\
+mkdir -p $PROJECT\
+cat > $PROJECT/appsettings.json <<'EOF'\
+\{\
+  "ConnectionStrings": \{\
+    "DefaultConnection": "Host=localhost;Database=GbcTicketing;Username=postgres;Password=postgres"\
+  \},\
+  "Smtp": \{\
+    "Host": "smtp.example.com",\
+    "Port": "587",\
+    "User": "smtp-user",\
+    "Pass": "smtp-pass",\
+    "From": "no-reply@example.com"\
+  \},\
+  "Logging": \{\
+    "LogLevel": \{\
+      "Default": "Information",\
+      "Microsoft.AspNetCore": "Warning"\
+    \}\
+  \},\
+  "AllowedHosts": "*"\
+\}\
+EOF\
+\
+# ---------- Models ----------\
+mkdir -p $PROJECT/Models\
+cat > $PROJECT/Models/ApplicationUser.cs <<'EOF'\
+using Microsoft.AspNetCore.Identity;\
+public class ApplicationUser : IdentityUser\
+\{\
+    public string? FullName \{ get; set; \}\
+\}\
+EOF\
+\
+cat > $PROJECT/Models/Category.cs <<'EOF'\
+public class Category\
+\{\
+    public int Id \{ get; set; \}\
+    public string Name \{ get; set; \} = null!;\
+    public string? Description \{ get; set; \}\
+    public ICollection<Event> Events \{ get; set; \} = new List<Event>();\
+\}\
+EOF\
+\
+cat > $PROJECT/Models/Event.cs <<'EOF'\
+public class Event\
+\{\
+    public int Id \{ get; set; \}\
+    public string Title \{ get; set; \} = null!;\
+    public int CategoryId \{ get; set; \}\
+    public Category? Category \{ get; set; \}\
+    public DateTime StartAt \{ get; set; \}\
+    public decimal Price \{ get; set; \}\
+    public int AvailableTickets \{ get; set; \}\
+    public string? StreamingUrl \{ get; set; \}\
+    public ICollection<Ticket> Tickets \{ get; set; \} = new List<Ticket>();\
+\}\
+EOF\
+\
+cat > $PROJECT/Models/Purchase.cs <<'EOF'\
+public class Purchase\
+\{\
+    public int Id \{ get; set; \}\
+    public DateTime PurchasedAt \{ get; set; \} = DateTime.UtcNow;\
+    public string? UserId \{ get; set; \}\
+    public ApplicationUser? User \{ get; set; \}\
+    public string GuestName \{ get; set; \} = null!;\
+    public string GuestEmail \{ get; set; \} = null!;\
+    public decimal Total \{ get; set; \}\
+    public ICollection<Ticket> Tickets \{ get; set; \} = new List<Ticket>();\
+\}\
+EOF\
+\
+cat > $PROJECT/Models/Ticket.cs <<'EOF'\
+public class Ticket\
+\{\
+    public int Id \{ get; set; \}\
+    public int EventId \{ get; set; \}\
+    public Event? Event \{ get; set; \}\
+    public int PurchaseId \{ get; set; \}\
+    public Purchase? Purchase \{ get; set; \}\
+    public int Quantity \{ get; set; \}\
+    public string Status \{ get; set; \} = "Active";\
+\}\
+EOF\
+\
+mkdir -p $PROJECT/Models/ViewModels\
+cat > $PROJECT/Models/ViewModels/PurchaseCreateVm.cs <<'EOF'\
+public class PurchaseCreateVm\
+\{\
+    public int EventId \{ get; set; \}\
+    public string? EventTitle \{ get; set; \}\
+    public int Quantity \{ get; set; \}\
+    public string GuestName \{ get; set; \} = null!;\
+    public string GuestEmail \{ get; set; \} = null!;\
+\}\
+EOF\
+\
+# ---------- Data ----------\
+mkdir -p $PROJECT/Data\
+cat > $PROJECT/Data/ApplicationDbContext.cs <<'EOF'\
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;\
+using Microsoft.EntityFrameworkCore;\
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>\
+\{\
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) \{ \}\
+    public DbSet<Category> Categories \{ get; set; \} = null!;\
+    public DbSet<Event> Events \{ get; set; \} = null!;\
+    public DbSet<Purchase> Purchases \{ get; set; \} = null!;\
+    public DbSet<Ticket> Tickets \{ get; set; \} = null!;\
+    protected override void OnModelCreating(ModelBuilder builder)\
+    \{\
+        base.OnModelCreating(builder);\
+        builder.Entity<Event>().Property(e => e.Price).HasPrecision(18,2);\
+    \}\
+\}\
+EOF\
+\
+cat > $PROJECT/Data/DataSeed.cs <<'EOF'\
+using Microsoft.AspNetCore.Identity;\
+public static class DataSeed\
+\{\
+    public static async Task SeedAsync(IServiceProvider services)\
+    \{\
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();\
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();\
+        var db = services.GetRequiredService<ApplicationDbContext>();\
+        if (!await roleManager.RoleExistsAsync("Admin"))\
+            await roleManager.CreateAsync(new IdentityRole("Admin"));\
+        if (!await roleManager.RoleExistsAsync("User"))\
+            await roleManager.CreateAsync(new IdentityRole("User"));\
+        var adminEmail = "admin@gbc.ca";\
+        var admin = await userManager.FindByEmailAsync(adminEmail);\
+        if (admin == null)\
+        \{\
+            admin = new ApplicationUser \{ UserName = adminEmail, Email = adminEmail, FullName="Course Admin" \};\
+            await userManager.CreateAsync(admin, "Admin123!");\
+            await userManager.AddToRoleAsync(admin, "Admin");\
+        \}\
+        if (!db.Categories.Any())\
+        \{\
+            var webinar = new Category \{ Name="Webinar" \};\
+            var concert = new Category \{ Name="Concert" \};\
+            db.Categories.AddRange(webinar, concert);\
+            db.Events.Add(new Event \{ Title="Welcome Webinar", Category=webinar, StartAt=DateTime.UtcNow.AddDays(7), Price=0, AvailableTickets=100 \});\
+            db.Events.Add(new Event \{ Title="Virtual Concert", Category=concert, StartAt=DateTime.UtcNow.AddDays(14), Price=15, AvailableTickets=200 \});\
+            await db.SaveChangesAsync();\
+        \}\
+    \}\
+\}\
+EOF\
+\
+# ---------- Services ----------\
+mkdir -p $PROJECT/Services\
+cat > $PROJECT/Services/IEmailService.cs <<'EOF'\
+public interface IEmailService\
+\{\
+    Task SendPurchaseConfirmationAsync(Purchase purchase);\
+\}\
+EOF\
+\
+cat > $PROJECT/Services/EmailService.cs <<'EOF'\
+using MailKit.Net.Smtp;\
+using MimeKit;\
+using MailKit.Security;\
+public class EmailService : IEmailService\
+\{\
+    private readonly IConfiguration _cfg;\
+    public EmailService(IConfiguration cfg) => _cfg = cfg;\
+    public async Task SendPurchaseConfirmationAsync(Purchase purchase)\
+    \{\
+        var msg = new MimeMessage();\
+        msg.From.Add(MailboxAddress.Parse(_cfg["Smtp:From"]));\
+        msg.To.Add(MailboxAddress.Parse(purchase.GuestEmail));\
+        msg.Subject = $"Your tickets \'97 Purchase #\{purchase.Id\}";\
+        msg.Body = new TextPart("plain")\{ Text=$"Thanks \{purchase.GuestName\}, you bought \{purchase.Tickets.Sum(t=>t.Quantity)\} tickets."\};\
+        using var client = new SmtpClient();\
+        await client.ConnectAsync(_cfg["Smtp:Host"], int.Parse(_cfg["Smtp:Port"]), SecureSocketOptions.StartTls);\
+        await client.AuthenticateAsync(_cfg["Smtp:User"], _cfg["Smtp:Pass"]);\
+        await client.SendAsync(msg);\
+        await client.DisconnectAsync(true);\
+    \}\
+\}\
+EOF\
+\
+# ---------- Controllers ----------\
+mkdir -p $PROJECT/Controllers\
+cat > $PROJECT/Controllers/HomeController.cs <<'EOF'\
+using Microsoft.AspNetCore.Mvc;\
+public class HomeController : Controller\
+\{\
+    private readonly ApplicationDbContext _db;\
+    public HomeController(ApplicationDbContext db) \{ _db = db; \}\
+    public IActionResult Index() => View(_db.Events.ToList());\
+\}\
+EOF\
+\
+cat > $PROJECT/Controllers/EventController.cs <<'EOF'\
+using Microsoft.AspNetCore.Mvc;\
+using Microsoft.EntityFrameworkCore;\
+public class EventController : Controller\
+\{\
+    private readonly ApplicationDbContext _db;\
+    public EventController(ApplicationDbContext db) \{ _db = db; \}\
+    public IActionResult Index() => View(_db.Events.Include(e=>e.Category).ToList());\
+    public IActionResult Details(int id)\
+    \{\
+        var ev = _db.Events.Include(e=>e.Category).FirstOrDefault(e=>e.Id==id);\
+        return ev==null ? NotFound() : View(ev);\
+    \}\
+\}\
+EOF\
+\
+cat > $PROJECT/Controllers/PurchaseController.cs <<'EOF'\
+using Microsoft.AspNetCore.Mvc;\
+using Microsoft.EntityFrameworkCore;\
+public class PurchaseController : Controller\
+\{\
+    private readonly ApplicationDbContext _db;\
+    private readonly IEmailService _email;\
+    public PurchaseController(ApplicationDbContext db,IEmailService email)\{_db=db;_email=email;\}\
+    [HttpGet] public IActionResult Create(int eventId)\
+    \{\
+        var ev=_db.Events.Find(eventId);\
+        if(ev==null) return NotFound();\
+        return View(new PurchaseCreateVm\{EventId=ev.Id,EventTitle=ev.Title,Quantity=1\});\
+    \}\
+    [HttpPost] public async Task<IActionResult> Create(PurchaseCreateVm vm)\
+    \{\
+        var ev=_db.Events.Find(vm.EventId); if(ev==null) return NotFound();\
+        var p=new Purchase\{GuestName=vm.GuestName,GuestEmail=vm.GuestEmail,Total=vm.Quantity*ev.Price\};\
+        p.Tickets.Add(new Ticket\{Event=ev,Quantity=vm.Quantity\});\
+        ev.AvailableTickets-=vm.Quantity; _db.Purchases.Add(p);\
+        await _db.SaveChangesAsync(); await _email.SendPurchaseConfirmationAsync(p);\
+        return RedirectToAction("Confirmation",new\{id=p.Id\});\
+    \}\
+    public IActionResult Confirmation(int id)\
+    \{\
+        var p=_db.Purchases.Include(x=>x.Tickets).ThenInclude(t=>t.Event).FirstOrDefault(x=>x.Id==id);\
+        return p==null?NotFound():View(p);\
+    \}\
+\}\
+EOF\
+\
+cat > $PROJECT/Controllers/ReportController.cs <<'EOF'\
+using Microsoft.AspNetCore.Mvc;\
+using Microsoft.EntityFrameworkCore;\
+public class ReportController:Controller\
+\{\
+    private readonly ApplicationDbContext _db;\
+    public ReportController(ApplicationDbContext db)\{_db=db;\}\
+    public IActionResult SalesOverview()\
+    \{\
+        ViewBag.Total=_db.Purchases.Sum(p=>p.Total);\
+        return View(_db.Tickets.Include(t=>t.Event).ToList());\
+    \}\
+\}\
+EOF\
+\
+# ---------- Views ----------\
+mkdir -p $PROJECT/Views/Home $PROJECT/Views/Event $PROJECT/Views/Purchase $PROJECT/Views/Report\
+cat > $PROJECT/Views/_ViewImports.cshtml <<'EOF'\
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers\
+EOF\
+\
+cat > $PROJECT/Views/Home/Index.cshtml <<'EOF'\
+@model IEnumerable<Event>\
+<h2>Upcoming Events</h2>\
+<ul>\
+@foreach(var e in Model)\{<li><a href="/Event/Details/@e.Id">@e.Title</a> - @e.StartAt</li>\}\
+</ul>\
+EOF\
+\
+cat > $PROJECT/Views/Event/Details.cshtml <<'EOF'\
+@model Event\
+<h2>@Model.Title</h2>\
+<p>Category: @Model.Category?.Name</p>\
+<p>Price: @Model.Price</p>\
+<form method="get" action="/Purchase/Create">\
+<input type="hidden" name="eventId" value="@Model.Id"/>\
+<button>Buy</button>\
+</form>\
+EOF\
+\
+cat > $PROJECT/Views/Purchase/Create.cshtml <<'EOF'\
+@model PurchaseCreateVm\
+<h2>Purchase: @Model.EventTitle</h2>\
+<form asp-action="Create" method="post">\
+<input type="hidden" asp-for="EventId"/>\
+<input asp-for="GuestName" placeholder="Name"/>\
+<input asp-for="GuestEmail" placeholder="Email"/>\
+<input asp-for="Quantity" type="number"/>\
+<button>Confirm</button>\
+</form>\
+EOF\
+\
+cat > $PROJECT/Views/Purchase/Confirmation.cshtml <<'EOF'\
+@model Purchase\
+<h2>Confirmation</h2>\
+<p>Purchase #@Model.Id</p>\
+<ul>\
+@foreach(var t in Model.Tickets)\{<li>@t.Quantity x @t.Event?.Title</li>\}\
+</ul>\
+EOF\
+\
+cat > $PROJECT/Views/Report/SalesOverview.cshtml <<'EOF'\
+@model IEnumerable<Ticket>\
+<h2>Sales Overview</h2>\
+<p>Total Revenue: @ViewBag.Total</p>\
+<ul>\
+@foreach(var t in Model)\{<li>@t.Event?.Title - @t.Quantity tickets</li>\}\
+</ul>\
+EOF\
+\
+# ---------- README ----------\
+cat > $PROJECT/README.md <<'EOF'\
+# Virtual Event Ticketing System\
+\
+This is a minimal ASP.NET Core MVC scaffold for Assignment 2.\
+\
+## Features\
+- Identity authentication (Admin/User)\
+- Events and Categories\
+- Purchase flow with email confirmation\
+- Simple sales report\
+\
+## Run\
+```bash\
+dotnet restore\
+dotnet tool install --global dotnet-ef\
+dotnet ef migrations add Init\
+dotnet ef database update\
+dotnet run\
+}
