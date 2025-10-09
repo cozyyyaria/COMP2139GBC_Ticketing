@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Final Purchase Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .step { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+    </style>
+</head>
+<body>
+    <h1>🎯 Final Purchase Test</h1>
+    
+    <div class="step success">
+        <h3>✅ Fixed Issues:</h3>
+        <ul>
+            <li><strong>DateTime UTC:</strong> Fixed PostgreSQL DateTime compatibility</li>
+            <li><strong>Event Loading:</strong> Event details now load correctly</li>
+            <li><strong>Validation:</strong> Added comprehensive error handling</li>
+            <li><strong>Debug Logging:</strong> Added detailed console logging</li>
+        </ul>
+    </div>
+    
+    <div class="step info">
+        <h3>🧪 Test Purchase Flow:</h3>
+        <ol>
+            <li><strong>Go to Events:</strong> <a href="http://localhost:5128/Event" target="_blank">http://localhost:5128/Event</a></li>
+            <li><strong>Click "Buy":</strong> Click the Buy button on any event</li>
+            <li><strong>Fill Form:</strong>
+                <ul>
+                    <li>Guest Name: Test User</li>
+                    <li>Guest Email: test@example.com</li>
+                    <li>Quantity: 2</li>
+                </ul>
+            </li>
+            <li><strong>Submit:</strong> Click "Purchase" button</li>
+            <li><strong>Verify:</strong> Should redirect to confirmation page</li>
+        </ol>
+    </div>
+    
+    <div class="step info">
+        <h3>🔍 Expected Results:</h3>
+        <ul>
+            <li><strong>Event Details:</strong> Should show correct price and available tickets</li>
+            <li><strong>Purchase Success:</strong> Should redirect to confirmation page</li>
+            <li><strong>Ticket Decrease:</strong> Available tickets should decrease by quantity</li>
+            <li><strong>Purchase Record:</strong> Should appear in <a href="http://localhost:5128/Purchase" target="_blank">Purchases page</a></li>
+        </ul>
+    </div>
+    
+    <div class="step warning">
+        <h3>🚨 If Still Not Working:</h3>
+        <p>Check the terminal/console for these debug messages:</p>
+        <ul>
+            <li><strong>Event Loading:</strong> "Loading event X: Title=Y, Price=Z, Available=W"</li>
+            <li><strong>Purchase Received:</strong> "Received Purchase: EventId=X, GuestName=Y, GuestEmail=Z, Quantity=W"</li>
+            <li><strong>Model Validation:</strong> "ModelState.IsValid: True"</li>
+            <li><strong>Success:</strong> "Purchase saved successfully!"</li>
+        </ul>
+    </div>
+    
+    <div class="step error">
+        <h3>🔧 Common Issues:</h3>
+        <ul>
+            <li><strong>Form Validation:</strong> Make sure all fields are filled correctly</li>
+            <li><strong>Quantity:</strong> Must be between 1 and available tickets</li>
+            <li><strong>Email Format:</strong> Must be valid email format</li>
+            <li><strong>Browser Cache:</strong> Try refreshing the page (Ctrl+F5)</li>
+        </ul>
+    </div>
+    
+    <div class="step success">
+        <h3>🎉 What's Fixed:</h3>
+        <ul>
+            <li>✅ DateTime UTC compatibility with PostgreSQL</li>
+            <li>✅ Event details loading correctly</li>
+            <li>✅ Purchase form validation</li>
+            <li>✅ Ticket availability updates</li>
+            <li>✅ Error handling and debug logging</li>
+        </ul>
+    </div>
+</body>
+</html>

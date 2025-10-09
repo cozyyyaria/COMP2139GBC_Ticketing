@@ -1,0 +1,18 @@
+@model GBC_Ticketing.Web.Models.Category
+
+<h2>Category Details</h2>
+
+<div class="mb-3">
+    <strong>Name:</strong> @Model.Name
+</div>
+
+<div class="mb-3">
+    <strong>Description:</strong> @Model.Description
+</div>
+
+<div class="mb-3">
+    <strong>Number of Events:</strong> @ViewBag.EventCount
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

@@ -1,0 +1,121 @@
+﻿# .NET Core and .NET 5+ build output
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# JetBrains Rider
+.idea/
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# MSBuild
+*.dll
+*.dll.config
+*.exe
+*.exe.config
+*.pdb
+*.mda
+*.winmd
+*.xml
+*.cache
+*.dtbcfg
+*.ilk
+*.meta
+*.natvis
+*.nupkg
+*.nupkg.sha512
+*.snupkg
+*.swp
+*.swo
+*.user
+*.userprefs
+*.rsp
+*.dotCover
+
+# NuGet packages
+packages/
+*.nupkg
+*.nupkg.sha512
+*.snupkg
+nuget.exe
+nuget.config
+
+# Azure
+*.azurePubxml
+*.pubxml
+*.publishproj
+*.azureAppService
+*.azureFunctions
+
+# ASP.NET Core
+appsettings.Development.json
+appsettings.Staging.json
+appsettings.Production.json
+**/Properties/launchSettings.json
+
+# Web
+*.min.js
+*.min.css
+*.map
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage reports
+coverage/
+*.lcov
+*.clover
+*.opencover.xml
+
+# Backup files
+*~
+*.bak
+*.tmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

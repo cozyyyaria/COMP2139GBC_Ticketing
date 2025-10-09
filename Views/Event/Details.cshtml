@@ -1,0 +1,14 @@
+@model GBC_Ticketing.Web.Models.Event
+
+<h2>Event Details</h2>
+
+<div>
+    <h4>@Model.Title</h4>
+    <p>Date: @Model.EventDate.ToShortDateString()</p>
+    <p>Category: @Model.Category?.Name</p>
+    <p>Ticket Price: @Model.TicketPrice.ToString("C")</p>
+    <p>Available Tickets: @Model.AvailableTickets</p>
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

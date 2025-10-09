@@ -1,0 +1,36 @@
+@model GBC_Ticketing.Web.Controllers.PurchaseViewModel
+
+<h2>Buy Tickets</h2>
+
+<h4>@Model.EventTitle</h4>
+<p>Price per ticket: @Model.TicketPrice.ToString("C")</p>
+<p>Available tickets: @Model.AvailableTickets</p>
+
+<form asp-action="Buy" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <input type="hidden" asp-for="EventId" />
+    
+    <div class="form-group">
+        <label asp-for="GuestName"></label>
+        <input asp-for="GuestName" class="form-control" />
+        <span asp-validation-for="GuestName" class="text-danger"></span>
+    </div>
+    
+    <div class="form-group">
+        <label asp-for="GuestEmail"></label>
+        <input asp-for="GuestEmail" class="form-control" type="email"/>
+        <span asp-validation-for="GuestEmail" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Quantity"></label>
+        <input asp-for="Quantity" class="form-control" min="1" max="@Model.AvailableTickets" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Purchase</button>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

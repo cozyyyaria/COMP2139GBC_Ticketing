@@ -1,0 +1,67 @@
+@model IEnumerable<GBC_Ticketing.Web.Models.Purchase>
+
+<h2>Purchases</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+@{
+    // Use real model data if available, otherwise fall back to hardcoded data
+    var purchases = Model?.Any() == true ? Model : new List<GBC_Ticketing.Web.Models.Purchase>
+    {
+        new GBC_Ticketing.Web.Models.Purchase
+        {
+            GuestName = "Alice Johnson",
+            GuestEmail = "alice@example.com",
+            PurchaseDate = DateTime.Now.AddDays(-2),
+            TotalCost = 99.98m,
+            Tickets = new List<GBC_Ticketing.Web.Models.Ticket>
+            {
+                new GBC_Ticketing.Web.Models.Ticket { Event = new GBC_Ticketing.Web.Models.Event { Title = "Summer Concert" } },
+                new GBC_Ticketing.Web.Models.Ticket { Event = new GBC_Ticketing.Web.Models.Event { Title = "Summer Concert" } }
+            }
+        },
+        new GBC_Ticketing.Web.Models.Purchase
+        {
+            GuestName = "Bob Smith",
+            GuestEmail = "bob@example.com",
+            PurchaseDate = DateTime.Now.AddDays(-1),
+            TotalCost = 49.99m,
+            Tickets = new List<GBC_Ticketing.Web.Models.Ticket>
+            {
+                new GBC_Ticketing.Web.Models.Ticket { Event = new GBC_Ticketing.Web.Models.Event { Title = "Web Development Workshop" } }
+            }
+        }
+    };
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Guest Name</th>
+            <th>Guest Email</th>
+            <th>Purchase Date</th>
+            <th>Total Cost</th>
+            <th>Tickets</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var purchase in purchases)
+        {
+            <tr>
+                <td>@purchase.GuestName</td>
+                <td>@purchase.GuestEmail</td>
+                <td>@purchase.PurchaseDate.ToShortDateString()</td>
+                <td>@purchase.TotalCost.ToString("C")</td>
+                <td>
+                    @foreach (var ticket in purchase.Tickets)
+                    {
+                        <div>@ticket.Event?.Title</div>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

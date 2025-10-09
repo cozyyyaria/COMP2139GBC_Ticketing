@@ -1,0 +1,14 @@
+@model GBC_Ticketing.Web.Models.Purchase
+
+<h2>Purchase Confirmation</h2>
+
+<div>
+    <p><strong>Event:</strong> @Model.Tickets.First().Event.Title</p>
+    <p><strong>Date:</strong> @Model.Tickets.First().Event.EventDate.ToString("MMMM dd, yyyy hh:mm tt")</p>
+    <p><strong>Tickets Purchased:</strong> @Model.Tickets.Count</p>
+    <p><strong>Total Cost:</strong> $@Model.TotalCost</p>
+    <p><strong>Guest Name:</strong> @Model.GuestName</p>
+    <p><strong>Guest Email:</strong> @Model.GuestEmail</p>
+</div>
+
+<a asp-action="Index" asp-controller="Events">Back to Events</a>

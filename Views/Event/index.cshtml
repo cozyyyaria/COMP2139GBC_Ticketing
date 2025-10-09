@@ -1,0 +1,79 @@
+@model IEnumerable<GBC_Ticketing.Web.Models.Event>
+
+<div class="mb-3">
+    <strong>Total Events:</strong> @ViewBag.TotalEvents <br/>
+    <strong>Total Categories:</strong> @ViewBag.TotalCategories <br/>
+    <strong>Events with Low Tickets (&lt;5):</strong> @ViewBag.LowTicketEvents
+    <a asp-action="Overview" class="btn btn-link">Overview</a>
+    <a asp-action="Create" class="btn btn-primary">Create New Event</a>
+  </div>
+
+<div class="card mb-3 p-3">
+    <form id="filters" class="row g-2">
+        <div class="col-md-3">
+            <input type="text" name="search" class="form-control" placeholder="Search by title" />
+        </div>
+        <div class="col-md-2">
+            <select name="categoryId" class="form-control">
+                <option value="">All Categories</option>
+                @foreach (var c in (IEnumerable<SelectListItem>)ViewBag.Categories)
+                {
+                    <option value="@c.Value">@c.Text</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="startDate" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="endDate" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <select name="availability" class="form-control">
+                <option value="">Any Availability</option>
+                <option value="available">Available</option>
+                <option value="low">Low (&lt; 5)</option>
+                <option value="soldout">Sold Out</option>
+            </select>
+        </div>
+        <div class="col-md-1">
+            <select name="sort" class="form-control">
+                <option value="date">Date</option>
+                <option value="title">Title</option>
+                <option value="price">Price</option>
+            </select>
+        </div>
+        <div class="col-md-1">
+            <select name="dir" class="form-control">
+                <option value="asc">Asc</option>
+                <option value="desc">Desc</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<div id="results">
+    @await Html.PartialAsync("_EventTable", Model)
+  </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const form = document.getElementById('filters');
+            const results = document.getElementById('results');
+            let timer;
+            function trigger() {
+                const params = new URLSearchParams(new FormData(form));
+                fetch(`/Event/ListPartial?${params}`)
+                    .then(r => r.text())
+                    .then(html => { results.innerHTML = html; });
+            }
+            form.addEventListener('input', () => {
+                clearTimeout(timer);
+                timer = setTimeout(trigger, 250);
+            });
+            form.addEventListener('change', trigger);
+            trigger();
+        })();
+    </script>
+}
