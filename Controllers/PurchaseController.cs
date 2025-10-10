@@ -129,6 +129,22 @@ namespace GBC_Ticketing.Web.Controllers
 
             return View(purchases);
         }
+
+        // GET: Purchase/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            var purchase = await _context.Purchases
+                .Include(p => p.Tickets)
+                .ThenInclude(t => t.Event)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (purchase == null)
+            {
+                return NotFound();
+            }
+
+            return View(purchase);
+        }
     }
 
     // ViewModel for purchasing tickets

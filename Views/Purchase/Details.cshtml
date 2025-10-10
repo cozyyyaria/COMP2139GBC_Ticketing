@@ -1,0 +1,105 @@
+@model GBC_Ticketing.Web.Models.Purchase
+
+<h2>Purchase Details</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>Purchase Information</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Purchase ID:</dt>
+                    <dd class="col-sm-9">@Model.Id</dd>
+                    
+                    <dt class="col-sm-3">Guest Name:</dt>
+                    <dd class="col-sm-9">@Model.GuestName</dd>
+                    
+                    <dt class="col-sm-3">Guest Email:</dt>
+                    <dd class="col-sm-9">@Model.GuestEmail</dd>
+                    
+                    <dt class="col-sm-3">Purchase Date:</dt>
+                    <dd class="col-sm-9">@Model.PurchaseDate.ToString("MMMM dd, yyyy 'at' h:mm tt")</dd>
+                    
+                    <dt class="col-sm-3">Total Cost:</dt>
+                    <dd class="col-sm-9"><strong class="text-success">@Model.TotalCost.ToString("C")</strong></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Purchase Summary</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Total Tickets:</strong> @Model.Tickets.Count</p>
+                <p><strong>Events:</strong> @Model.Tickets.Select(t => t.Event?.Title).Distinct().Count()</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Ticket Details</h4>
+            </div>
+            <div class="card-body">
+                @if (Model.Tickets?.Any() == true)
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ticket #</th>
+                                    <th>Event</th>
+                                    <th>Seat Number</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ticket in Model.Tickets.OrderBy(t => t.Id))
+                                {
+                                    <tr>
+                                        <td>@ticket.Id</td>
+                                        <td>
+                                            @if (ticket.Event != null)
+                                            {
+                                                <strong>@ticket.Event.Title</strong>
+                                                <br>
+                                                <small class="text-muted">@ticket.Event.EventDate.ToString("MMMM dd, yyyy")</small>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Event no longer available</span>
+                                            }
+                                        </td>
+                                        <td>@ticket.SeatNumber</td>
+                                        <td>@ticket.Price.ToString("C")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <p>No tickets found for this purchase.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <a asp-action="Index" class="btn btn-secondary">Back to Purchases</a>
+        <a asp-action="Index" asp-controller="Event" class="btn btn-primary">View Events</a>
+    </div>
+</div>

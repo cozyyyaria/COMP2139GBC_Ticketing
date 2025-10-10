@@ -45,6 +45,7 @@
             <th>Purchase Date</th>
             <th>Total Cost</th>
             <th>Tickets</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -68,6 +69,9 @@
                             <div>@group.EventName @(group.Count > 1 ? $"({group.Count} tickets)" : "")</div>
                         }
                     }
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@purchase.Id" class="btn btn-info btn-sm">View Details</a>
                 </td>
             </tr>
         }
