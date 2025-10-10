@@ -185,11 +185,17 @@ public class EventController : Controller
     public async Task<IActionResult> Delete(int id)
     {
         var ev = await _context.Events
+            .Include(e => e.Category)
             .FirstOrDefaultAsync(e => e.Id == id);
         if (ev == null)
         {
             return NotFound();
         }
+        
+        // Check if there are any tickets associated with this event
+        var hasPurchases = await _context.Tickets.AnyAsync(t => t.EventId == id);
+        ViewBag.HasPurchases = hasPurchases;
+        
         return View(ev);
     }
 
@@ -199,22 +205,56 @@ public class EventController : Controller
     {
         try
         {
-            var ev = await _context.Events.FindAsync(id);
+            var ev = await _context.Events
+                .Include(e => e.Tickets)
+                .FirstOrDefaultAsync(e => e.Id == id);
+            
             if (ev == null)
             {
                 return NotFound();
             }
             
+            // Check if there are any tickets associated with this event
+            var hasTickets = await _context.Tickets.AnyAsync(t => t.EventId == id);
+            
+            if (hasTickets)
+            {
+                // Get all purchases that have tickets for this event
+                var purchasesWithTickets = await _context.Purchases
+                    .Where(p => p.Tickets.Any(t => t.EventId == id))
+                    .ToListAsync();
+                
+                // Delete all tickets for this event first
+                var ticketsToDelete = await _context.Tickets
+                    .Where(t => t.EventId == id)
+                    .ToListAsync();
+                _context.Tickets.RemoveRange(ticketsToDelete);
+                
+                // Delete all purchases that only had tickets for this event
+                foreach (var purchase in purchasesWithTickets)
+                {
+                    var remainingTickets = await _context.Tickets
+                        .AnyAsync(t => t.PurchaseId == purchase.Id);
+                    
+                    if (!remainingTickets)
+                    {
+                        _context.Purchases.Remove(purchase);
+                    }
+                }
+            }
+            
             Console.WriteLine($"Deleting event {id}: {ev.Title}");
             _context.Events.Remove(ev);
             await _context.SaveChangesAsync();
-            Console.WriteLine("Event deleted successfully!");
+            Console.WriteLine("Event and associated data deleted successfully!");
             
+            TempData["Message"] = $"Event '{ev.Title}' and all associated purchases have been deleted.";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error deleting event: {ex.Message}");
+            TempData["Error"] = $"Error deleting event: {ex.Message}";
             return RedirectToAction(nameof(Index));
         }
     }

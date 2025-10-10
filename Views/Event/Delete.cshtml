@@ -12,8 +12,22 @@
     <p>Available Tickets: @Model.AvailableTickets</p>
 </div>
 
+@if (ViewBag.HasPurchases == true)
+{
+    <div class="alert alert-warning">
+        <h5>⚠️ Warning</h5>
+        <p><strong>This event has associated ticket purchases!</strong></p>
+        <p>Deleting this event will also delete:</p>
+        <ul>
+            <li>All tickets for this event</li>
+            <li>All purchase records that only contain tickets for this event</li>
+        </ul>
+        <p><strong>This action cannot be undone!</strong></p>
+    </div>
+}
+
 <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Delete</button>
+    <button type="submit" class="btn btn-danger">Delete Event</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>

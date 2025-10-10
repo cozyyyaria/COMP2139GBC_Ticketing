@@ -24,4 +24,6 @@ public class Event
     [Required]
     [Range(0, int.MaxValue, ErrorMessage = "Available tickets must be 0 or greater")]
     public int AvailableTickets { get; set; }
+    
+    public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }
