@@ -3,6 +3,11 @@ using MimeKit;
 
 namespace GBC_Ticketing.Web.Services;
 
+public interface IEmailService
+{
+    Task SendEmailAsync(string to, string subject, string body);
+}
+
 public class EmailService : IEmailService
 {
     private readonly IConfiguration _config;
