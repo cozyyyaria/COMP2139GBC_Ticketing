@@ -32,6 +32,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Add redirect for /Events to /Event
+app.MapGet("/Events", () => Results.Redirect("/Event"));
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
