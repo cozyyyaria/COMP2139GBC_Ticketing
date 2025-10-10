@@ -95,6 +95,7 @@ appsettings.Production.json
 # Web
 *.min.js
 *.min.css
+!wwwroot/lib/bootstrap/dist/css/*.min.css
 *.map
 
 # TypeScript
