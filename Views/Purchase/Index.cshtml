@@ -56,9 +56,17 @@
                 <td>@purchase.PurchaseDate.ToShortDateString()</td>
                 <td>@purchase.TotalCost.ToString("C")</td>
                 <td>
-                    @foreach (var ticket in purchase.Tickets)
+                    @if (purchase.Tickets?.Any() == true)
                     {
-                        <div>@ticket.Event?.Title</div>
+                        var eventGroups = purchase.Tickets
+                            .Where(t => t.Event != null)
+                            .GroupBy(t => t.Event.Title)
+                            .Select(g => new { EventName = g.Key, Count = g.Count() });
+                        
+                        @foreach (var group in eventGroups)
+                        {
+                            <div>@group.EventName @(group.Count > 1 ? $"({group.Count} tickets)" : "")</div>
+                        }
                     }
                 </td>
             </tr>
