@@ -1,0 +1,32 @@
+@model IEnumerable<GBC_Ticketing.Web.Models.Event>
+
+<h2>Event Overview</h2>
+
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card p-3">
+            <strong>Total Events</strong>
+            <div>@ViewBag.TotalEvents</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <strong>Total Categories</strong>
+            <div>@ViewBag.TotalCategories</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <strong>Low Ticket Events (&lt;5)</strong>
+            <div>@ViewBag.LowTicketEvents</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <a asp-action="Index" class="btn btn-secondary mt-3">Back to Events</a>
+    </div>
+  </div>
+
+<h4>Low Ticket Alerts</h4>
+@await Html.PartialAsync("_EventTable", Model.Where(e => e.AvailableTickets > 0 && e.AvailableTickets < 5))
+
+

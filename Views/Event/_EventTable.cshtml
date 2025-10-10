@@ -1,0 +1,41 @@
+@model IEnumerable<GBC_Ticketing.Web.Models.Event>
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Ticket Price</th>
+            <th>Available Tickets</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var ev in Model)
+        {
+            <tr class="@(ev.AvailableTickets < 5 && ev.AvailableTickets > 0 ? "table-warning" : ev.AvailableTickets == 0 ? "table-danger" : "")">
+                <td>@ev.Title</td>
+                <td>@ev.EventDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@ev.Category?.Name</td>
+                <td>@ev.TicketPrice.ToString("C")</td>
+                <td>@ev.AvailableTickets</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@ev.Id" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Edit" asp-route-id="@ev.Id" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@ev.Id" class="btn btn-danger btn-sm">Delete</a>
+                    <a asp-controller="Purchase" asp-action="Buy" asp-route-id="@ev.Id" class="btn btn-primary btn-sm">Buy</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No events found.</p>
+}
+
+
