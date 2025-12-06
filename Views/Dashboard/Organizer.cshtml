@@ -1,0 +1,183 @@
+@{
+    ViewData["Title"] = "Organizer Dashboard";
+    var eventsWithRevenue = ViewBag.EventsWithRevenue as IEnumerable<dynamic>;
+    var user = ViewBag.User as GBC_Ticketing.Web.Models.ApplicationUser;
+}
+
+<style>
+    /* Organizer Dashboard Dark Theme */
+    .organizer-dashboard .card {
+        background: rgba(15, 11, 24, 0.95) !important;
+        border: 1px solid rgba(75, 255, 223, 0.2) !important;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .organizer-dashboard .card-header {
+        background: linear-gradient(90deg, rgba(75, 255, 223, 0.1), rgba(122, 92, 255, 0.1)) !important;
+        border-bottom: 2px solid rgba(75, 255, 223, 0.3) !important;
+        padding: 18px 25px;
+    }
+    
+    .organizer-dashboard .card-header h5 {
+        color: #4bffdf !important;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .organizer-dashboard .card-body {
+        background: rgba(15, 11, 24, 0.85) !important;
+        padding: 25px;
+    }
+    
+    .organizer-dashboard .table-responsive {
+        background-color: transparent !important;
+    }
+    
+    .organizer-dashboard .table {
+        color: #ffffff !important;
+        margin-bottom: 0;
+        background-color: transparent !important;
+    }
+    
+    .organizer-dashboard .table thead {
+        background-color: rgba(20, 15, 30, 0.9) !important;
+    }
+    
+    .organizer-dashboard .table thead th {
+        border-bottom: 2px solid #4bffdf !important;
+        color: #4bffdf !important;
+        font-weight: 700;
+        background: rgba(20, 15, 30, 0.9) !important;
+        padding: 15px 12px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-top: none !important;
+    }
+
+    .organizer-dashboard .table tbody {
+        background-color: transparent !important;
+    }
+
+    .organizer-dashboard .table tbody tr {
+        background-color: rgba(20, 15, 30, 0.7) !important;
+        transition: all 0.3s ease;
+    }
+    
+    /* Override ALL possible Bootstrap striping and white backgrounds */
+    .organizer-dashboard .table tbody tr:nth-child(odd),
+    .organizer-dashboard .table tbody tr:nth-child(even),
+    .organizer-dashboard .table tbody tr:nth-of-type(odd),
+    .organizer-dashboard .table tbody tr:nth-of-type(even),
+    .organizer-dashboard .table-striped tbody tr:nth-of-type(odd),
+    .organizer-dashboard .table-striped tbody tr:nth-of-type(even),
+    .organizer-dashboard .table tbody > tr:nth-child(odd),
+    .organizer-dashboard .table tbody > tr:nth-child(even) {
+        background-color: rgba(20, 15, 30, 0.7) !important;
+    }
+    
+    .organizer-dashboard .table tbody tr:hover {
+        background-color: rgba(75, 255, 223, 0.12) !important;
+        box-shadow: inset 3px 0 0 #4bffdf;
+    }
+
+    .organizer-dashboard .table td {
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        vertical-align: middle;
+        color: #ffffff !important;
+        padding: 15px 12px;
+        font-size: 0.95rem;
+        background-color: rgba(20, 15, 30, 0.7) !important;
+    }
+    
+    .organizer-dashboard .table th {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        background-color: rgba(20, 15, 30, 0.9) !important;
+    }
+    
+    .organizer-dashboard .btn-sm {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-weight: 600;
+        margin-right: 5px;
+    }
+    
+    .organizer-dashboard h1 {
+        color: #fff;
+        font-weight: 700;
+        margin-bottom: 30px;
+    }
+</style>
+
+<div class="container mt-4 organizer-dashboard">
+    <h1 class="mb-4">Organizer Dashboard - @(user?.FullName ?? user?.Email)</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>My Events</h5>
+                    <a asp-controller="Event" asp-action="Create" class="btn btn-primary btn-sm">Create New Event</a>
+                </div>
+                <div class="card-body">
+                    @if (eventsWithRevenue != null && eventsWithRevenue.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Event Title</th>
+                                        <th>Category</th>
+                                        <th>Event Date</th>
+                                        <th>Tickets Sold</th>
+                                        <th>Total Revenue</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in eventsWithRevenue)
+                                    {
+                                        <tr>
+                                            <td>@item.Event.Title</td>
+                                            <td>@item.Event.Category?.Name</td>
+                                            <td>@item.Event.EventDate.ToString("MMMM dd, yyyy HH:mm")</td>
+                                            <td>@item.TicketsSold</td>
+                                            <td>@item.Revenue.ToString("C")</td>
+                                            <td>
+                                                <a asp-controller="Event" asp-action="Details" asp-route-id="@item.Event.Id" class="btn btn-sm btn-info" title="View Details">Details</a>
+                                                <a asp-controller="Event" asp-action="Edit" asp-route-id="@item.Event.Id" class="btn btn-sm btn-warning" title="Edit Event">Edit</a>
+                                                <a asp-controller="Event" asp-action="Delete" asp-route-id="@item.Event.Id" class="btn btn-sm btn-danger" title="Delete Event">Delete</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No events created yet. <a asp-controller="Event" asp-action="Create">Create your first event</a>.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Analytics</h5>
+                </div>
+                <div class="card-body">
+                    <a asp-controller="Event" asp-action="MyAnalytics" class="btn btn-primary">View Analytics Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
