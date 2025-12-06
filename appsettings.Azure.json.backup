@@ -1,0 +1,19 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=gbc-ticketing-db.postgres.database.azure.com;Port=5432;Database=GBC_TICKETING;Username=adminuser;Password=SecurePass123!;SslMode=Require;Trust Server Certificate=true"
+  },
+  "Smtp": {
+    "From": "arianacruz271@gmail.com",
+    "Host": "smtp.gmail.com",
+    "Port": "587",
+    "User": "arianacruz271@gmail.com",
+    "Pass": "jdgv vjyq jdmr sfax"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
